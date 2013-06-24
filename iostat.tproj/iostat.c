@@ -477,9 +477,9 @@ do_phdr()
 
 	for (i = 0; i < num_devices && i < maxshowdevs; i++){
 		if (oflag > 0)
-			(void)printf("%12.6s ", drivestat[i].name);
+			(void)printf("%20.9s ", drivestat[i].name);
 		else
-			printf("%15.6s ", drivestat[i].name);
+			printf("%24.14s ", drivestat[i].name);
 	}
 		
 	if (Cflag > 0)
@@ -501,7 +501,7 @@ do_phdr()
 				(void)printf(" blk xfr msps ");
 		} else {
 			if (Iflag == 0)
-				printf("    KB/t tps  MB/s ");
+				printf("    r/s  w/s  KB/t  tps  MB/s ");
 			else
 				printf("    KB/t xfrs   MB ");
 		}
@@ -526,6 +526,7 @@ devstats(int perf_select, long double etime, int havelast)
 	long double kb_per_transfer, mb_per_second;
 	u_int64_t value;
 	u_int64_t total_bytes, total_transfers, total_blocks, total_time;
+	u_int64_t total_read_bytes, total_written_bytes;
 	u_int64_t interval_bytes, interval_transfers, interval_blocks;
 	u_int64_t interval_time;
 	long double interval_mb;
@@ -542,6 +543,8 @@ devstats(int perf_select, long double etime, int havelast)
 		total_bytes = 0;
 		total_transfers = 0;
 		total_time = 0;
+		total_read_bytes = 0;
+		total_written_bytes = 0;
 
 		/* get drive properties */
 		status = IORegistryEntryCreateCFProperties(drivestat[i].driver,
@@ -563,11 +566,13 @@ devstats(int perf_select, long double etime, int havelast)
 				CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey)))) {
 				CFNumberGetValue(number, kCFNumberSInt64Type, &value);
 				total_bytes += value;
+				total_read_bytes += value;
 			}
 			if ((number = (CFNumberRef)CFDictionaryGetValue(statistics,
 				CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey)))) {
 				CFNumberGetValue(number, kCFNumberSInt64Type, &value);
 				total_bytes += value;
+				total_written_bytes += value;
 			}
 
 			/*
@@ -653,7 +658,9 @@ devstats(int perf_select, long double etime, int havelast)
 				       ms_per_transaction);
 		} else {
 			if (Iflag == 0)
-				printf(" %7.2Lf %3.0Lf %5.2Lf ", 
+				printf("%7.2Lf %5.2Lf %3.2Lf %3.0Lf %5.2Lf ",
+				       total_written_bytes,
+				       total_read_bytes,
 				       kb_per_transfer,
 				       transfers_per_second,
 				       mb_per_second);
