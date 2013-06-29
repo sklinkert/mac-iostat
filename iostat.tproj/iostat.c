@@ -503,7 +503,7 @@ do_phdr()
 				(void)printf(" blk xfr msps ");
 		} else {
 			if (Iflag == 0)
-				printf("    r/s  w/s  KB/t  tps  MB/s ");
+				printf("     r/s   w/s   KB/t  tps ");
 			else
 				printf("    KB/t xfrs   MB ");
 		}
@@ -672,12 +672,11 @@ devstats(int perf_select, long double etime, int havelast)
 				       ms_per_transaction);
 		} else {
 			if (Iflag == 0)
-				printf("%7.2Lf %5.2Lf %3.2Lf %3.0Lf %5.2Lf ",
+				printf("%8.2Lf %6.2Lf %6.2Lf %3.0Lf ",
 				       mb_read_per_second,
 				       mb_written_per_second,
 				       kb_per_transfer,
-				       transfers_per_second,
-				       mb_per_second);
+				       transfers_per_second);
 			else {
 				interval_mb = interval_bytes;
 				interval_mb /= 1024 * 1024;
