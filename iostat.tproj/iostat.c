@@ -148,6 +148,8 @@ struct drivestats {
 	char			name[MAXDRIVENAME + 1];
 	u_int64_t		blocksize;
 	u_int64_t		total_bytes;
+	u_int64_t		total_read_bytes;
+	u_int64_t		total_written_bytes;
 	u_int64_t		total_transfers;
 	u_int64_t		total_time;
 };
@@ -523,11 +525,13 @@ devstats(int perf_select, long double etime, int havelast)
 	CFDictionaryRef properties;
 	CFDictionaryRef statistics;
 	long double transfers_per_second;
-	long double kb_per_transfer, mb_per_second;
+	long double kb_per_transfer, mb_per_second, mb_read_per_second;
+	long double mb_written_per_second;
 	u_int64_t value;
 	u_int64_t total_bytes, total_transfers, total_blocks, total_time;
 	u_int64_t total_read_bytes, total_written_bytes;
-	u_int64_t interval_bytes, interval_transfers, interval_blocks;
+	u_int64_t interval_bytes, interval_read_bytes, interval_written_bytes;
+	u_int64_t interval_transfers, interval_blocks;
 	u_int64_t interval_time;
 	long double interval_mb;
 	long double blocks_per_second, ms_per_transaction;
@@ -610,6 +614,10 @@ devstats(int perf_select, long double etime, int havelast)
 		 * Compute delta values and stats.
 		 */
 		interval_bytes = total_bytes - drivestat[i].total_bytes;
+		interval_read_bytes = total_read_bytes -
+				      drivestat[i].total_read_bytes;
+		interval_written_bytes = total_written_bytes -
+					 drivestat[i].total_written_bytes;
 		interval_transfers = total_transfers 
 			- drivestat[i].total_transfers;
 		interval_time = total_time - drivestat[i].total_time;
@@ -617,6 +625,8 @@ devstats(int perf_select, long double etime, int havelast)
 		/* update running totals, only once for -I */
 		if ((Iflag == 0) || (drivestat[i].total_bytes == 0)) {
 			drivestat[i].total_bytes = total_bytes;
+			drivestat[i].total_read_bytes = total_read_bytes;
+			drivestat[i].total_written_bytes = total_written_bytes;
 			drivestat[i].total_transfers = total_transfers;
 			drivestat[i].total_time = total_time;
 		}				
@@ -627,6 +637,10 @@ devstats(int perf_select, long double etime, int havelast)
 		blocks_per_second = interval_blocks / etime;
 		transfers_per_second = interval_transfers / etime;
 		mb_per_second = (interval_bytes / etime) / (1024 * 1024);
+		mb_read_per_second = (interval_read_bytes / etime) /
+				     (1024 * 1024);
+		mb_written_per_second = (interval_written_bytes / etime) /
+					(1024 * 1024);
 
 		kb_per_transfer = (interval_transfers > 0) ?
 			((long double)interval_bytes / interval_transfers) 
@@ -659,8 +673,8 @@ devstats(int perf_select, long double etime, int havelast)
 		} else {
 			if (Iflag == 0)
 				printf("%7.2Lf %5.2Lf %3.2Lf %3.0Lf %5.2Lf ",
-				       total_written_bytes,
-				       total_read_bytes,
+				       mb_read_per_second,
+				       mb_written_per_second,
 				       kb_per_transfer,
 				       transfers_per_second,
 				       mb_per_second);
