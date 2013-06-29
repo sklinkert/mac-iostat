@@ -3,8 +3,7 @@ mac-iostat
 
 Extended iostat for Mac OS X.
 
-Based on the official version of iostat from Apple, this iostat prints some more detailed information about disk I/O. For example seperated values for reads and writes per second.
-
+Based on the official version (system_cmds 550.10) of iostat from Apple, this version prints some more detailed information about disk I/O operations. For example it's able to show you seperated values for *written and read megabytes per second*.
 
 How to build:
 -------------
